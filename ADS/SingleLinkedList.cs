@@ -1,4 +1,4 @@
-// namespace CM_ADS;
+namespace CM_ADS;
 
 
 public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
@@ -57,16 +57,16 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     // Очистка списка
     public void Clear()
     {
-        this._first = null;
-        this._pos = 0;
+        _first = null;
+        _pos = 0;
     }
 
     // Проверка на значение
     public bool ContainsValue(T value)
     {
-        if (this._first != null)
+        if (_first != null)
         {
-            List<K, T> e = this._first;
+            List<K, T> e = _first;
             do
             {
                 if (e.Value.CompareTo(value) == 0)
@@ -128,13 +128,13 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     // Вставка перед заданным узлом
     public int AddBefore(int k, List<K, T> item)
     {
-        if (this._first == null || this.Count < k)
+        if (_first == null || Count < k)
         {
             AddStart(item.Key, item.Value);
-            return this._pos;
+            return _pos;
         }
 
-        List<K, T> e = this._first;
+        List<K, T> e = _first;
 
         for (int i = 0; i < k; i++)
         {
@@ -143,14 +143,12 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
             e = e.Next;
         }
         
-        
         List<K, T> temp = e.Next;
-
         
         e.Next = item;  
         item.Next = temp; 
         
-        return this._pos++;
+        return _pos++;
     }
     
     // Удаление начального узла 
@@ -158,15 +156,15 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     {
         List<K, T> e;
         
-        if ((e = this._first) == null) return 0;
+        if ((e = _first) == null) return 0;
 
         if (e.Next != null)
         {
             e = e.Next;
-            this._first = e;
+            _first = e;
         }
 
-        return this._pos--;
+        return _pos--;
     }
 
     
@@ -174,11 +172,38 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     
     public int DelEnd()
     {
-        if (this._first == null) return 0;
+        if (_first == null) return 0;
         
-        return this._pos--;
+        return _pos--;
     }
 
+    // Копирование списка в другую переменную
+    public SingleLinkedList<K, T> Copy()
+    {
+        SingleLinkedList<K, T> result = new SingleLinkedList<K, T>();
+        List<K, T> elem = _first;
+        while (elem.Next != null)
+        {
+            result.AddStart(elem.Key, elem.Value);
+            elem = elem.Next;
+        }
+
+        return result;
+    }
+    
+    // Переворот списка
+    public void Flip()
+    {
+        SingleLinkedList<K, T> temp = Copy();
+        Clear();
+        
+        List<K, T> elem = temp._first;
+        for (int k = 0; k < temp.Count; k++)
+        {
+            AddEnd(elem.Key, elem.Value);
+            elem = elem.Next;
+        }
+    }
 }
 
 

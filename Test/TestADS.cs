@@ -10,10 +10,10 @@ public class TestADS
         StringBuilder taskString = new StringBuilder();
 
         taskString.AppendLine("Выберите тему:");
-        taskString.AppendLine("1) Множества");
-        taskString.AppendLine("2) Сортировки");
-        taskString.AppendLine("3) Списки");
-        taskString.AppendLine("4) Хэш-таблицы");
+        taskString.AppendLine("✓1) Множества");
+        taskString.AppendLine("✓2) Сортировки");
+        taskString.AppendLine("✓3) Списки");
+        taskString.AppendLine("✓4) Хэш-таблицы");
         taskString.AppendLine("5) Графы");
         taskString.AppendLine("6) Бинарное дерево");
 
@@ -191,7 +191,10 @@ public class TestADS
         sLL.AddBefore(1, new List<int, string>(3, "kazah"));
 
         sLL.PrintList();
+        
+        sLL.Flip();
 
+        sLL.PrintList();
     }
     
     private static void TestHashTable()
@@ -206,18 +209,54 @@ public class TestADS
         {
             Console.WriteLine(key);
         }
+        Console.WriteLine("");
+        
+        HashTable<string, string> stores = new HashTable<string, string>();
+        stores.Add("Baker", "How to live long");
+        stores.Add("Simon", "I see ya'll");
+
+        // Console.WriteLine(books.GetValue("Baker"));
+
+        foreach (string key in stores.Values())
+        {
+            Console.WriteLine(key);
+        }
 
     }
 
     private static void TestGraph()
     {
+        Graph<int> grapha = new Graph<int>();
+        grapha.AddNode(33);
+        grapha.AddNode(10);
+        grapha.AddNode(1);
+        grapha.AddNode(5);
+        grapha.AddNode(81);
         
+        grapha.AddEdge(1, 33);
+        grapha.AddEdge(5, 81);
+        grapha.AddEdge(81, 33);
+        grapha.AddEdge(10, 1);
+        grapha.AddEdge(10, 81);
+        grapha.AddEdge(5, 1);
+        
+        List<int> bfs = grapha.BFS(81);
+        foreach (int node in bfs)
+        {
+            Console.WriteLine(node);
+        }
+        Console.WriteLine("");
+        List<int> dfs = grapha.DFS(81);
+        foreach (int node in dfs)
+        {
+            Console.WriteLine(node);
+        }
         return;
     }
 
     private static void TestBinaryTree()
     {
-
+        
         return;
     }
     

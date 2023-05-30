@@ -297,6 +297,30 @@ class Matrix
 
     // TODO: Метод Гивенса
 
+    public static void Givens(double[,] A, int n)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = i + 1; j < n; j++)
+            {
+                if (A[i, j] != 0)
+                {
+                    double r = Math.Sqrt(A[i, i] * A[i, i] + A[j, i] * A[j, i]);
+                    double c = A[i, i] / r;
+                    double s = -A[j, i] / r;
+
+                    for (int k = 0; k < n; k++)
+                    {
+                        double x = A[i, k];
+                        double y = A[j, k];
+                        A[i, k] = c * x - s * y;
+                        A[j, k] = s * x + c * y;
+                    }
+                }
+            }
+        }
+    }
+
     
 
 

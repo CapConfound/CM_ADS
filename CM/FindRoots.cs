@@ -78,5 +78,21 @@ class FindRoots
 
         return x;
     }
+    
+    // Метод последовательных приблежений
+    public double IterApprox (double x, double eps, Func f)
+    {
+        double delta;
+        double old_delta = double.MaxValue;
+        do
+        {
+            double xs = f(x);
+            delta = Math.Abs(xs - x);
+            x = xs;
+            if (delta > old_delta) {return double.NaN; }
+            old_delta = delta;
+        } while (delta > eps);
+        return x;
+    }
 
 }

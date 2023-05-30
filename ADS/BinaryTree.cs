@@ -43,60 +43,100 @@ public class BinaryTree <T> where T : IComparable
     public Node<T> Find(int key)
     {
         Node<T> current = root;
-        while (current != null && !current.Value.Equals(key)) {
-            if (key.CompareTo(current.Value) < 0) {
-                current = current.LNode;
-            } else {
-                current = current.RNode;
-            }
+        
+        while (current != null && current.Key != key)
+        {
+            current = key < current.Key ? current.LNode : current.RNode;
         }
+
         return current;
     }
     
-    // удаление по ключу
-    public bool Delete(int key) 
+    private Node<T> FindSuccessor(Node<T> toDelete)
     {
+        var successor = toDelete.RNode;
+
+        while (successor.LNode != null)
+        {
+            successor = successor.LNode;
+        }
+
+        return successor;
+    }
+    
+    // удаление по ключу
+    public void Delete(int key)
+    {
+        root = DeleteRecursive(root, key);
+    }
+
+    private Node<T> DeleteRecursive(Node<T> current, int key)
+    {
+        if (current == null)
+        {
+            return current;
+        }
+
+        if (key < current.Key)
+        {
+            current.LNode = DeleteRecursive(current.LNode, key);
+        }
+        else if (key > current.Key)
+        {
+            current.RNode = DeleteRecursive(current.RNode, key);
+        }
+        else
+        {
+            if (current.LNode == null)
+            {
+                return current.RNode;
+            }
+            else if (current.RNode == null)
+            {
+                return current.LNode;
+            }
+
+            current.Value = FindMin(current.RNode).Value;
+            current.Key = FindMin(current.RNode).Key;
+
+            current.RNode = DeleteRecursive(current.RNode, current.Key);
+        }
+
+        return current;
+    }
+
+    
+    private Node<T> FindParent(Node<T> node, int key) {
         Node<T> parent = null;
-        Node<T> current = root;
 
-        while (current != null && !current.Value.Equals(key)) {
-            parent = current;
+        while (!node.Value.Equals(key)) {
+            parent = node;
 
-            if (key.CompareTo(current.Value) < 0) {
-                current = current.LNode;
+            if (key.CompareTo(Convert.ToInt32(node.Value)) < 0) {
+                node = node.LNode;
             } else {
-                current = current.RNode;
+                node = node.RNode;
             }
         }
 
-        if (current == null) {
-            return false;
-        }
-
-        if (current.LNode == null && current.RNode == null)
-        {
-            DeleteLeaf(parent, current);
-        } 
-        else if (current.LNode != null && current.RNode != null)
-        {
-            DeleteTwoChildren(parent, current);
-        } 
-        else
-        {
-            DeleteOneChild(parent, current);
-        }
-
-        return true;
+        return parent;
     }
 
-    private void DeleteLeaf(Node<T> parent,  Node <T> current) 
+    private void DeleteLeaf( Node <T> current) 
     {
-        if (current == root) {
+        if (current == root)
+        {
             root = null;
-        } else if (parent.LNode == current) {
-            parent.LNode = null;
-        } else {
-            parent.RNode = null;
+            return;
+        }
+
+        if (current.Parent.LNode == current)
+        {
+            current.Parent.LNode = null;
+        }
+        else
+        {
+            current.Parent.RNode = null;
         }
     }
 
@@ -119,31 +159,7 @@ public class BinaryTree <T> where T : IComparable
         } 
     }
 
-    private void DeleteTwoChildren(Node <T> parent, Node <T> current) 
-    {
-        Node<T> successorParent = current.RNode;
-        Node<T> successor = successorParent.LNode;
-
-        while (successor != null && successor.LNode != null) {
-            successorParent = successor;
-            successor = successor.LNode;
-        }
-
-        if (successor != null && !successor.Value.Equals(current.RNode.Value)) {
-            successorParent.LNode = successor.RNode;
-            successor.RNode = current.RNode;
-        }
-
-        if (current == root) {
-            root = successor;
-        } else if (parent.LNode == current) {
-            parent.LNode = successor;
-        } else {
-            parent.RNode = successor;
-        }
-
-        successor.LNode = current.LNode;
-    }
+    
 
     // просмотр дерева
     public void ViewTree() 

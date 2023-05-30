@@ -130,7 +130,8 @@ public class TestADS
             Console.Write("{0} \t", el);
         }
         Console.WriteLine();
-        Sort.RadixSort(abcdr);
+        Sort.RadixSort(abcdr, abcdr.Length);
+        Console.WriteLine("Sorted:");
         foreach (int el in abcdr) {
             Console.Write("{0} \t", el);
         }

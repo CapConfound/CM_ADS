@@ -257,7 +257,19 @@ public class TestADS
 
     private static void TestBinaryTree()
     {
+        BinaryTree<string> tree = new BinaryTree<string>();
+
+        tree.Insert(1, "main");
+        tree.Insert(10, "main-left");
+        tree.Insert(11, "main-right");
+        tree.Insert(0, "main-0");
         
+        tree.ViewTree(tree.root);
+
+        tree.Delete(11);
+        
+        tree.ViewTree(tree.root);
+
         return;
     }
     

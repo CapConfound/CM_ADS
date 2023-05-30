@@ -2,33 +2,27 @@
 
 public class Node <T> where T : IComparable
 {
-    public Node <T> Left;
-    public Node <T> Right;
-    public Node <T> Parent;
-
-    public T value;
-    public int key;
-
-    public Node(T value, int key) 
+    public T Value;
+    public int Key;
+    public Node<T> Parent;
+    public Node<T> LNode;
+    public Node<T> RNode;
+    
+    public Node(int key, T value)
     {
-        this.value = value;
-        this.key = key;
-        Left = null;
-        Right = null;
+        Value = value;
+        Key = key;
+        LNode = null;
+        RNode = null;
         Parent = null;
     }
     
     public Node()
     {
-        this.value = default;
-        this.key = 0;
-        Left = null;
-        Right = null;
+        Value = default;
+        Key = 0;
+        LNode = null;
+        RNode = null;
         Parent = null;
-    }
-    
-    public Node<T> GetParent()
-    {
-        return new Node<T>();
     }
 }

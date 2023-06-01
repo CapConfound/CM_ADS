@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using CM_ADS;
+using CM_ADS.CW;
 
 class Program
 {
@@ -9,6 +10,7 @@ class Program
         taskString.AppendLine("Выберите предмет:");
         taskString.AppendLine("1) Численные методы");
         taskString.AppendLine("2) Алгоритмы и структуры данных");
+        taskString.AppendLine("3) Курсовая");
         Console.WriteLine(taskString);
         
         String input = Console.ReadLine();
@@ -16,13 +18,16 @@ class Program
 
         switch (input) {
             case "1":
-                TestCM testCm = new TestCM();
-                testCm.Test();
+                TestCM.Test();
                 break;
             
             case "2":
-                TestADS testADS = new TestADS();
-                testADS.Test();
+                TestADS.Test();
+                break;
+            
+            case "3":
+                
+                TestCourseWork.TestCW();
                 break;
             
             default:

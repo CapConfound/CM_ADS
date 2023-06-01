@@ -4,7 +4,7 @@ namespace CM_ADS;
 
 public class TestADS
 {
-    public void Test()
+    public static void Test()
     {
         
         StringBuilder taskString = new StringBuilder();

@@ -133,6 +133,24 @@ class Matrix
         }
         return result;
     }
+    
+    public static Matrix operator -(Matrix m1, Matrix m2)     //Вычитание матриц
+    {
+        if (m1.rows != m2.rows || m1.columns != m2.columns)
+        {
+            throw new Exception("Матрицы не совпадают по размерности");
+        }
+        Matrix result = new Matrix(m1.rows, m1.columns);
+
+        for (int i = 0; i < m1.rows; i++)
+        {
+            for (int j = 0; j < m2.columns; j++)
+            {
+                result[i, j] = m1[i, j] - m2[i, j];
+            }
+        }
+        return result;
+    }
 
     public static Matrix operator *(Matrix m, int digit)
     {
@@ -295,33 +313,18 @@ class Matrix
     }
 
 
-    // TODO: Метод Гивенса
-
-    public static void Givens(double[,] A, int n)
+    // TODO: Метод Гивенса (вращения)
+    public static Matrix Givens(int row1, int row2, double cos, double sin, Matrix A)
     {
-        for (int i = 0; i < n; i++)
+        double temp;
+        
+        for (int k = 0; k < A.GetColumn(1).Size; k++)
         {
-            for (int j = i + 1; j < n; j++)
-            {
-                if (A[i, j] != 0)
-                {
-                    double r = Math.Sqrt(A[i, i] * A[i, i] + A[j, i] * A[j, i]);
-                    double c = A[i, i] / r;
-                    double s = -A[j, i] / r;
-
-                    for (int k = 0; k < n; k++)
-                    {
-                        double x = A[i, k];
-                        double y = A[j, k];
-                        A[i, k] = c * x - s * y;
-                        A[j, k] = s * x + c * y;
-                    }
-                }
-            }
+            temp = cos * A[row1, k] + sin * A[row2, k];
+            A[row2, k] = -sin * A[row1, k] + cos * A[row2, k];
+            A[row1, k] = temp;
         }
+        return A;
     }
-
-    
-
 
 }

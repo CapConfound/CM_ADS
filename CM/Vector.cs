@@ -3,6 +3,7 @@ class Vector
     protected int size;
     protected double[] data;
     static Random rnd = new Random();
+    
     public int Size { get { return size; } }
 
     public Vector(int size)
@@ -43,7 +44,7 @@ class Vector
         return rez;
     }
     public override string ToString()
-        => $"{{{string.Join(";", this.data)}}}";
+        => $"{{{string.Join(";", data)}}}";
     /*
     public override string ToString()
     {
@@ -167,5 +168,17 @@ class Vector
             return s;
         }
         return Double.NaN;
+    }
+    
+    public static Vector operator /(Vector b, double c)
+    {
+        int n = b.Size;
+        Vector result = new Vector(n);
+        
+        for (int i = 0; i < n; i++)
+        {
+            result[i] = b[i] / c;
+        }
+        return result;
     }
 }

@@ -3,7 +3,7 @@ using System.Text;
 public class TestCM
 {
     
-    public void Test()
+    public static void Test()
     {
 
         StringBuilder taskString = new StringBuilder();
@@ -53,7 +53,6 @@ public class TestCM
                 return;
         }
         
-        TestRootsSearch();
     }
     
     // Численные методы ЛР 1 Поиск корня уравнения скаларной функции
@@ -80,8 +79,21 @@ public class TestCM
         Matrix mG = new Matrix(3, 3);
         mG = Matrix.InvertedG(m1);
         Matrix.PrintMatrix(mG);
+
+        Console.WriteLine("Givens");
+        double[,] gg = { { 4, 2, 5 }, { 3, 5, 4 }, {7, 1, 8}};
+        Matrix mat = new Matrix(gg);
+        Matrix.PrintMatrix(mat);
+        double c = 0.6;
+        double s = 0.8;
+        int i = 0;
+        int j = 1;
+        mat = Matrix.Givens(i, j, c, s, mat);
+        Matrix.PrintMatrix(mat);
+
+        // Console.WriteLine("Обратная матрица. Метод квадратных корней");
         
-        Console.WriteLine("Обратная матрица. Метод квадратных корней");
+        
         
     }
 

@@ -225,30 +225,55 @@ public class BinaryTree <T> where T : IComparable
         return y;
 
     }
-    // поиск узла с предыдущем значением ключа чем t.key
-    public Node <T> Prev(Node <T> t)
-    {
-        if (t == null)
-        {
-            return null;
-        }
-
-        if (t.LNode != null)
-        {
-            // tut minimum()
-            return FindMax(t.LNode);
-        }
-        Node <T> y = t.Parent;
-        while (y != null && t == y.LNode) 
-        {
-            t = y;
-            y = y.Parent;
-        }
-        return y;
-    }
-
     
-    // просмотр дерева по возрастанию ключа с использованием метода Next
-    // просмотр дерева по убыванию ключа с использованием метода Prev
-    // Левый и правый повороты (см. книгу Кормена)
+    // TODO: Левый и правый повороты (см. книгу Кормена)
+
+    public void RotateLeft(Node<T> node)
+    {
+        if (node == null || node.RNode == null)
+            return;
+
+        Node<T> pivot = node.RNode;
+        node.RNode = pivot.LNode;
+
+        if (node.RNode != null)
+            node.RNode.Parent = node;
+
+        pivot.Parent = node.Parent;
+
+        if (node.Parent == null)
+            root = pivot;
+        else if (node == node.Parent.LNode)
+            node.Parent.LNode = pivot;
+        else
+            node.Parent.RNode = pivot;
+
+        pivot.LNode = node;
+        node.Parent = pivot;
+    }
+    
+    public void RotateRight(Node<T> node)
+    {
+        if (node == null || node.LNode == null)
+            return;
+
+        Node<T> pivot = node.LNode;
+        node.LNode = pivot.RNode;
+
+        if (node.LNode != null)
+            node.LNode.Parent = node;
+
+        pivot.Parent = node.Parent;
+
+        if (node.Parent == null)
+            root = pivot;
+        else if (node == node.Parent.LNode)
+            node.Parent.LNode = pivot;
+        else
+            node.Parent.RNode = pivot;
+
+        pivot.RNode = node;
+        node.Parent = pivot;
+    }
+    
 }

@@ -263,13 +263,27 @@ public class TestADS
         tree.Insert(10, "main-left");
         tree.Insert(11, "main-right");
         tree.Insert(0, "main-0");
+        tree.Insert(7, "apple");
+        tree.Insert(18, "banana");
+        tree.Insert(14, "orange");
+        tree.Insert(12, "grape");
+        tree.Insert(5, "pear");
+        tree.Insert(9, "kiwi");
+        tree.Insert(20, "mango");
+        tree.Insert(3, "pineapple");
+        tree.Insert(10, "cherry");
+        tree.Insert(6, "strawberry");
         
+        Console.WriteLine("Vanilla");
         tree.ViewTree(tree.root);
 
         tree.Delete(11);
-        
+        Console.WriteLine("Удалил 11");
         tree.ViewTree(tree.root);
-
+        
+        tree.RotateLeft(tree.root);
+        Console.WriteLine("Поворотик налево");
+        tree.ViewTree(tree.root);
         return;
     }
     

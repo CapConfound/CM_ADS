@@ -227,31 +227,83 @@ public class TestADS
 
     private static void TestGraph()
     {
-        Graph<int> grapha = new Graph<int>();
-        grapha.AddNode(33);
-        grapha.AddNode(10);
-        grapha.AddNode(1);
-        grapha.AddNode(5);
-        grapha.AddNode(81);
+        Graph graph = new Graph();
         
-        grapha.AddEdge(1, 33);
-        grapha.AddEdge(5, 81);
-        grapha.AddEdge(81, 33);
-        grapha.AddEdge(10, 1);
-        grapha.AddEdge(10, 81);
-        grapha.AddEdge(5, 1);
+        Vertex vertexA = new Vertex("A");
+        Vertex vertexB = new Vertex("B");
+        Vertex vertexC = new Vertex("C");
+        Vertex vertexD = new Vertex("D");
+        Vertex vertexE = new Vertex("E");
+
+        // Add vertices to the graph
+        graph.Vertices.Add(vertexA);
+        graph.Vertices.Add(vertexB);
+        graph.Vertices.Add(vertexC);
+        graph.Vertices.Add(vertexD);
+        graph.Vertices.Add(vertexE);
+
+        // Create edges
+        Edge edgeAB = new Edge(vertexA, vertexB, 1.0);
+        Edge edgeAC = new Edge(vertexA, vertexC, 2.0);
+        Edge edgeBC = new Edge(vertexB, vertexC, 3.0);
+        Edge edgeBD = new Edge(vertexB, vertexD, 4.0);
+        Edge edgeCD = new Edge(vertexC, vertexD, 5.0);
+        Edge edgeCE = new Edge(vertexC, vertexE, 6.0);
+        Edge edgeDE = new Edge(vertexD, vertexE, 7.0);
+
+        // Add edges to the vertices
+        vertexA.AddEdge(edgeAB);
+        vertexA.AddEdge(edgeAC);
+        vertexB.AddEdge(edgeBC);
+        vertexB.AddEdge(edgeBD);
+        vertexC.AddEdge(edgeCD);
+        vertexC.AddEdge(edgeCE);
+        vertexD.AddEdge(edgeDE);
+
+        // Add edges to the graph
+        graph.Edges.Add(edgeAB);
+        graph.Edges.Add(edgeAC);
+        graph.Edges.Add(edgeBC);
+        graph.Edges.Add(edgeBD);
+        graph.Edges.Add(edgeCD);
+        graph.Edges.Add(edgeCE);
+        graph.Edges.Add(edgeDE);
+
+        Vertex startVertex = graph.Vertices[0];
+        Vertex endVertex = graph.Vertices[2];
+        List<Vertex> bfsPath = graph.BFS(startVertex, endVertex);
+        // graph.DFS(startVertex);
+
+        if (bfsPath == null)
+        {
+            Console.WriteLine("No bfs path found.");
+        }
+        else
+        {
+            Console.WriteLine("BFS path from "+startVertex+ " to "+endVertex+":");
+            foreach (Vertex v in bfsPath)
+            {
+                Console.Write(v.Label + " ");
+            }
+            Console.WriteLine();
+        }
         
-        List<int> bfs = grapha.BFS(81);
-        foreach (int node in bfs)
-        {
-            Console.WriteLine(node);
-        }
-        Console.WriteLine("");
-        List<int> dfs = grapha.DFS(81);
-        foreach (int node in dfs)
-        {
-            Console.WriteLine(node);
-        }
+        // if (dfsPath == null)
+        // {
+        //     Console.WriteLine("No dfs path found.");
+        //
+        // }
+        // else
+        // {
+        //     Console.WriteLine("DFS path:");
+        //     foreach (Vertex v in dfsPath)
+        //     {
+        //         Console.Write(v.Label + " ");
+        //     }
+        //     Console.WriteLine();
+        // }
+        
+        
         return;
     }
 

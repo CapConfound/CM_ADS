@@ -1,5 +1,9 @@
 // TODO: Матричные операции + - *
 
+using System.Drawing;
+
+namespace CM_ADS.CM;
+
 class Matrix
 {
     protected int rows, columns;
@@ -186,7 +190,24 @@ class Matrix
         }
 
         return result;
+    }
 
+    public static Vector operator *(Vector v, Matrix m)
+    {
+        if (m.rows != v.Size)
+        {
+            throw new Exception("Ряды матрицы должны быть равны размеру вертикального вектора");
+        }
+
+        Vector result = new Vector(m.rows);
+        for (int i = 0; i < m.rows; i++)
+        {
+            for (int j = 0; j < m.columns; j++) {
+                result[i] += m[i, j] * v[j];
+            }
+        }
+
+        return result;
     }
 
     public static Matrix operator *(Matrix m1, Matrix m2)
@@ -241,6 +262,72 @@ class Matrix
         return s1 - s2;
     }
 
+    public static Vector TopTriangle(Matrix mat, Vector b)
+    {
+        double eps = 000000.1;
+        if (mat.Rows != b.Size && mat.Rows != mat.Columns) return null;
+
+        for (int i = 0; i < mat.Rows; i++)
+        {
+            if (mat[i, i] == 0.0) return null;
+            
+            for (int j = 0; j < i; j++)
+                if (Math.Abs(mat[i, j]) < eps) return null;
+        }
+
+        // корни
+        Vector x = new Vector(mat.rows);
+        
+        // записываю очевидное
+        x[mat.rows - 1] = b[mat.rows - 1] / mat[mat.rows - 1, mat.rows - 1];
+        
+        // основной цикл
+        for (int i = mat.rows - 2; i >= 0; i--)
+        {
+            double sum = 0;
+            
+            for (int j = i + 1; j < mat.rows; j++)
+                sum += mat[i, j] * x[j];
+            
+            x[i] = (b[i] - sum) / mat[i, i];
+        }
+        
+        return x;
+    }
+    
+    public static Vector BottomTriangle(Matrix mat, Vector b)
+    {
+        double eps = 000000.1;
+        
+        if (mat.Rows != b.Size && mat.Rows != mat.Columns) return null;
+
+        for (int i = 1; i < mat.Rows; i++)
+        {
+            if (mat[i, i] == 0.0) return null;
+            
+            for (int j = i + 1; j < i; j++)
+                if (Math.Abs(mat[i, j]) < eps) return null;
+        }
+
+        // корни
+        Vector x = new Vector(mat.rows);
+        
+        // записываю очевидное
+        x[0] = b[0] / mat[0, 0];
+        
+        // основной цикл
+        for (int i = 0; i < mat.rows; i++)
+        {
+            double sum = 0;
+            
+            for (int j = 0; j < i; j++)
+                sum += mat[i, j] * x[j];
+            
+            x[i] = (b[i] - sum) / mat[i, i];
+        }
+        return x;
+    }
+
     // TODO: Вычисление обратной матрицы Метод Гаусса
     public static Matrix InvertedG(Matrix m)
     {
@@ -251,7 +338,6 @@ class Matrix
         
         Matrix result = new Matrix(m.rows, m.columns);
         
-
         for (int i = 0; i < n; i++)
             result[i, i] = 1;
 
@@ -267,12 +353,12 @@ class Matrix
         for (int k = 0; k < n; k++) //k-номер строки
         {
             for (int i = 0; i < 2*n; i++) //i-номер столбца
-                Matrix_Big[k, i] = Matrix_Big[k, i] / m[k, k]; //Деление k-строки на первый член !=0 для преобразования его в единицу
+                Matrix_Big[k, i] /= m[k, k]; //Деление k-строки на первый член !=0 для преобразования его в единицу
             for (int i = k + 1; i < n; i++) //i-номер следующей строки после k
             {
                 double K = Matrix_Big[i, k] / Matrix_Big[k, k]; //Коэффициент
                 for (int j = 0; j < 2*n; j++) //j-номер столбца следующей строки после k
-                    Matrix_Big[i, j] = Matrix_Big[i, j] - Matrix_Big[k, j] * K; //Зануление элементов матрицы ниже первого члена, преобразованного в единицу
+                    Matrix_Big[i, j] -= Matrix_Big[k, j] * K; //Зануление элементов матрицы ниже первого члена, преобразованного в единицу
             }
             for (int i = 0; i < n; i++) //Обновление, внесение изменений в начальную матрицу
                 for (int j = 0; j < n; j++)
@@ -300,31 +386,186 @@ class Matrix
         return result;
     }
 
-    // TODO: Вычисление обратной матрицы: Метод квадратных корней
-    public static Matrix InvertedSR(Matrix m)
+    // Метод прогонки (всего 3 диагонали. остальное нули)
+    public static Vector Sweep(Vector overMainDia, Vector mainDia, Vector underMainDia, Vector f)
     {
-        if (m.rows != m.columns)
-            throw new Exception("Матрица должна быть квадратной");
+        int n = mainDia.Size;
+        Vector x = new Vector(n);
+        Vector alpha = mainDia.Copy();
+        Vector beta = f.Copy();
 
-        Matrix result = new Matrix(m.rows, m.columns);
-
+        if (f.Size == n) return null;
         
-        return result;
-    }
+        double m;
+        double eps = 0.00000001;
 
+        for (int i = 0; i < overMainDia.Size; i++)
+        {
+            if (Math.Abs(overMainDia[i]) < eps) return null;
+        }
+        
+        for (int i = 0; i < mainDia.Size; i++)
+        {
+            if (Math.Abs(mainDia[i]) < eps) return null;
+        }
+        
+        for (int i = 0; i < underMainDia.Size; i++)
+        {
+            if (Math.Abs(underMainDia[i]) < eps) return null;
+        }
+        
+        for (int i = 1; i < n; i++)
+        {
+            m = underMainDia[1] / alpha[i - 1];
+            alpha[i] -= m * overMainDia[i - 1];
+            beta[i] -= m * f[i - 1];
+        }
+
+        x[n - 1] = f[n - 1] / mainDia[n - 1];
+
+        for (int i = n - 2; i >= 0; i--)
+        {
+            x[i] = (f[i] - overMainDia[i] * x[i + 1]) / alpha[i];
+        }
+
+        return x;
+    }
+    
+    public static Vector GrammSchmidt(Matrix A, Vector B)
+    {
+        if (A.Rows != A.Columns || A.Rows != B.Size) return null;
+
+        int n = A.Rows;
+        Matrix R = new Matrix(n, n);
+        Matrix T = new Matrix(n, n);
+        for (int i = 0; i < n; i++)
+        {
+            T[i, i] = 1;
+        }
+
+        R.SetColumn(0, A.GetColumn(0));
+        for (int i = 1; i < n; i++)
+        {
+            for (int j = 0; j < i; j++)
+            {
+                Vector a = A.GetColumn(i);
+                Vector r = R.GetColumn(j);
+                T[j, i] = a * r / (r * r);
+
+                Vector rNew = a;
+                for (int k = 0; k < i; k++)
+                    rNew -= T[k, i] * R.GetColumn(k);
+
+                R.SetColumn(i, rNew);
+            }
+        }
+        Matrix D = R.Transpose() * R;
+        for (int i = 0; i < n; i++)
+        {
+            if (D[i, i] == 0) return null;
+            D[i, i] = 1 / D[i, i];
+        }
+        Vector y = R.Transpose() * B * D;
+
+        return TopTriangle(T, y);
+    }
 
     // TODO: Метод Гивенса (вращения)
-    public static Matrix Givens(int row1, int row2, double cos, double sin, Matrix A)
+    public static Vector Givens(Matrix mat, Vector b)
     {
-        double temp;
+        if (mat.Rows != mat.Columns || mat.Rows != b.Size) return null;
         
-        for (int k = 0; k < A.GetColumn(1).Size; k++)
+        Matrix A = mat.Copy();
+        Vector B = b.Copy();
+        int n = A.Rows;
+        
+        for (int i = 0; i < n; i++)
         {
-            temp = cos * A[row1, k] + sin * A[row2, k];
-            A[row2, k] = -sin * A[row1, k] + cos * A[row2, k];
-            A[row1, k] = temp;
+            for (int j = i + 1; j < n; j++)
+            {   
+                // находим косинус и синус для матрицы вращения
+                double cos = A[i, i] / Math.Sqrt(A[i, i] * A[i,i] + A[j, i] * A[j,i]);
+                double sin = A[j, i] / Math.Sqrt(A[i, i] * A[i, i] + A[j, i] * A[j, i]);
+                
+                
+                // матрица вращения
+                Matrix Q = new Matrix(n, n);
+                
+                for (int k = 0; k < n; k++) 
+                    Q[k, k] = 1;
+                
+                Q[i, i] = cos; Q[j, j] = cos;
+                Q[j, i] = -sin; Q[i, j] = sin;
+                
+                A = Q * A;
+                B = Q * B;
+            }
         }
-        return A;
+        // решаем уравнение обратным ходом
+        return TopTriangle(mat, b);
     }
+    
+    // метод последовательных приблежений
+    public static Vector IterativeApprox(Matrix mat, Vector b)
+    {
+        if (mat.Rows != mat.Columns || mat.Rows != b.Size)
+            return null;
 
+        int n = mat.Rows;
+        double eps = 0.000001;
+        int max;
+
+        for (int j = 0; j < n; j++)
+        {
+            max = j;
+            for (int i = j + 1; i < n; i++)
+                if (Math.Abs(mat[i, j]) > Math.Abs(mat[max, j])) max = i;
+
+            if (max != j)
+            {
+                mat.SetRow(max, mat.GetRow(j));
+                mat.SetRow(j, mat.GetRow(max));
+                
+                double tmp;
+                tmp = b[max];
+                b[max] = b[j];
+                b[j] = tmp;
+            }
+            
+            if (Math.Abs(mat[j, j]) < eps) return null;
+        }
+
+        Matrix alpha = new Matrix(n, n); 
+        Vector beta = new Vector(n);
+        
+        for (int i = 0; i < n; i++)
+        {
+            if (mat[i, i] == 0) return null;
+            
+            beta[i] = b[i] / mat[i, i];
+            
+            for (int j = 0; j < n; j++)
+            {
+                if (i != j)
+                    alpha[i, j] = mat[i, j] / mat[i, i];
+                else
+                    alpha[i, j] = 0;
+            }
+            
+            beta[i] = b[i] / mat[i, i];
+        }
+
+        Vector prev_x = beta;
+        Vector x;
+        Vector delta;
+
+        do
+        {
+            x = beta - alpha * prev_x;
+            delta = x - prev_x;
+            prev_x = x;
+        } while (delta.Norma1() > eps);
+
+        return prev_x;
+    }
 }

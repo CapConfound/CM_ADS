@@ -1,3 +1,5 @@
+namespace CM_ADS.CM;
+
 class FindRoots
 {
     public delegate double Func(double x);

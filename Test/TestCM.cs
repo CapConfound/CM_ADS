@@ -1,5 +1,8 @@
 using System.Text;
 
+
+namespace CM_ADS.CM;
+
 public class TestCM
 {
     
@@ -84,17 +87,20 @@ public class TestCM
         double[,] gg = { { 4, 2, 5 }, { 3, 5, 4 }, {7, 1, 8}};
         Matrix mat = new Matrix(gg);
         Matrix.PrintMatrix(mat);
-        double c = 0.6;
-        double s = 0.8;
-        int i = 0;
-        int j = 1;
-        mat = Matrix.Givens(i, j, c, s, mat);
-        Matrix.PrintMatrix(mat);
-
+        
+        Vector gv = Matrix.Givens(mat, vec1);
+        double[] els = gv.GetElements();
+        foreach (var el in els)
+        {
+            Console.Write(el + " ");
+        }
+        Console.WriteLine("");
+        
         // Console.WriteLine("Обратная матрица. Метод квадратных корней");
         
-        
-        
+
+        Console.WriteLine("MPP");
+        TestMPP();
     }
 
     private static void TestSpline()
@@ -103,6 +109,22 @@ public class TestCM
 
     private static void TestSquaures()
     {
+    }
+
+    private static void TestMPP()
+    {
+        Vector x = new Vector(new double[] { 0, 5, 10, 15, 20, 25 });
+        Vector y = new Vector(new double[] { 21, 39, 51, 63, 70, 90 });
+        MNK.FuncPsi[] psiArray = new MNK.FuncPsi[] { x => 1, x => x };
+
+        Console.WriteLine($"X: {x}");
+        Console.WriteLine($"Y: {y}");
+        Console.WriteLine("Функция 1 = 1");
+        Console.WriteLine("Функция 2 = x");
+
+        MNK func = new MNK(x, y, psiArray);
+        Console.WriteLine("Параметры: {0}", func.Params);
+        Console.WriteLine("Критерий: {0}", func.GetCriteria());
     }
 
 

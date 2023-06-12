@@ -1,81 +1,99 @@
 ﻿namespace CM_ADS;
+
 // https://neerc.ifmo.ru/wiki/index.php?title=%D0%94%D0%B5%D1%80%D0%B5%D0%B2%D0%BE_%D0%BF%D0%BE%D0%B8%D1%81%D0%BA%D0%B0,_%D0%BD%D0%B0%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F_%D1%80%D0%B5%D0%B0%D0%BB%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F
-public class BinaryTree <T> where T : IComparable
+public class BinaryTree<T> where T : IComparable
 {
     // Корень дерева
-    public Node <T> root;
-    
+    public Node<T> root;
+
     public BinaryTree()
     {
         root = null;
     }
-    
+
     // вставка нового узла
     public void Insert(int key, T value)
     {
-        if (root == null) {
+        if (root == null)
+        {
             root = new Node<T>(key, value);
             return;
         }
-        
-        Node<T> current = root;
-        
-        while (true) {
-            if (value.CompareTo(current.Value) < 0) {
-                if (current.LNode == null) {
+
+        var current = root;
+
+        while (true)
+        {
+            if (key < current.Key)
+            {
+                if (current.LNode == null)
+                {
                     current.LNode = new Node<T>(key, value);
+                    current.LNode.Parent = current;
                     break;
                 }
+
                 current = current.LNode;
-            } else if (value.CompareTo(current.Value) > 0) {
-                if (current.RNode == null) {
+            }
+            else
+            {
+                if (current.RNode == null)
+                {
                     current.RNode = new Node<T>(key, value);
+                    current.RNode.Parent = current;
                     break;
                 }
+
                 current = current.RNode;
-            } else {
-                break;
             }
         }
     }
-    
+
     // поиск узла по ключу
     public Node<T> Find(int key)
     {
         Node<T> current = root;
-        
-        while (current != null && current.Key != key)
+
+        while (current != null)
         {
-            current = key < current.Key ? current.LNode : current.RNode;
+            if (current.Key == key) return current;
+            if (current.Key > key)
+            {
+                if (current.LNode != null)
+                    current = current.LNode;
+                else
+                    return new Node<T>();
+            }
+            if (current.Key < key)
+            {
+                if (current.RNode != null) 
+                    current = current.RNode;
+                else 
+                    return new Node<T>();
+            }
         }
 
         return current;
     }
-    
-    private Node<T> FindSuccessor(Node<T> toDelete)
-    {
-        var successor = toDelete.RNode;
 
-        while (successor.LNode != null)
-        {
-            successor = successor.LNode;
-        }
+    private Node<T> FindSuccessor(Node<T> current)
+    {
+        Node<T> successor = current.RNode;
+
+        while (successor.LNode != null) successor = successor.LNode;
 
         return successor;
     }
-    
+
     // удаление по ключу
-    public void Delete(int key)
+    public void DeleteR(int key)
     {
         root = DeleteRecursive(root, key);
     }
 
     private Node<T> DeleteRecursive(Node<T> current, int key)
     {
-        if (current == null)
-        {
-            return current;
-        }
+        if (current == null) return current;
 
         if (key < current.Key)
         {
@@ -87,14 +105,8 @@ public class BinaryTree <T> where T : IComparable
         }
         else
         {
-            if (current.LNode == null)
-            {
-                return current.RNode;
-            }
-            else if (current.RNode == null)
-            {
-                return current.LNode;
-            }
+            if (current.LNode == null) return current.RNode;
+            if (current.RNode == null) return current.LNode;
 
             current.Value = FindMin(current.RNode).Value;
             current.Key = FindMin(current.RNode).Key;
@@ -105,28 +117,46 @@ public class BinaryTree <T> where T : IComparable
         return current;
     }
 
-    
-    private Node<T> FindParent(Node<T> node, int key) {
-        Node<T> parent = null;
+    public void Delete(int key)
+    {
+        Node<T> toDelete = Find(key);
+        
+        if (toDelete == null) return;
 
-        while (!node.Value.Equals(key)) {
-            parent = node;
+        Node<T> rightNode = toDelete.RNode;
+        Node<T> leftNode = toDelete.LNode;
 
-            if (key.CompareTo(Convert.ToInt32(node.Value)) < 0) {
-                node = node.LNode;
-            } else {
-                node = node.RNode;
-            }
+        // если нет детей
+        if (rightNode == null && leftNode == null)
+        {
+            DeleteLeaf(toDelete);
+            return;
         }
 
-        return parent;
-    }
-
-    private void DeleteLeaf( Node <T> current) 
-    {
-        if (current == root)
+        // Если есть только левый ребенок
+        if (rightNode == null)
         {
-            root = null;
+            DeleteOneChild(toDelete, leftNode);
+            return;
+        }
+        
+        // Если есть только правый ребенок
+        if (leftNode == null)
+        {
+            DeleteOneChild(toDelete, rightNode);
+            return;
+        }
+
+        // Оба ребенка есть 
+        DeleteBothChildren(toDelete, leftNode, rightNode);
+
+    }
+    
+    private void DeleteLeaf(Node<T> current)
+    {
+        if (current.Parent == null)
+        {
+            root = new Node<T>();
             return;
         }
 
@@ -134,98 +164,190 @@ public class BinaryTree <T> where T : IComparable
         {
             current.Parent.LNode = null;
         }
+
+        current.Parent.RNode = null;
+    }
+
+    private void DeleteOneChild(Node<T> current, Node<T> child)
+    {
+        Node<T> parent = current.Parent;
+        
+        child.Parent = parent;
+        
+        if (parent.RNode == current) 
+            parent.RNode = child;
+        else 
+            parent.LNode = child;
+    }
+
+    private void DeleteBothChildren(Node<T> current, Node<T> leftNode, Node<T> rightNode)
+    {
+        Node<T> parent = current.Parent;
+        
+        // минимальный преемник
+        Node<T> minNode = FindMin(rightNode);
+
+        if (minNode == rightNode)
+        {
+            // сдвигаем левого потомка направо
+            minNode.LNode = leftNode;
+            leftNode.Parent = minNode;
+            minNode.Parent = parent;
+            
+            if (current == parent.RNode)
+                parent.RNode = minNode;
+            else
+                parent.LNode = minNode;
+            
+            return;
+        }
+        
+        minNode.LNode = leftNode;
+        minNode.RNode = rightNode;
+        
+        rightNode.Parent = minNode;
+        leftNode.Parent = minNode;
+
+        minNode.Parent.LNode = new Node<T>();
+        minNode.Parent = parent;
+
+        if (current == parent.RNode)
+        {
+            parent.RNode = minNode;
+        }
         else
         {
-            current.Parent.RNode = null;
+            parent.LNode = minNode;
         }
     }
 
-    private void DeleteOneChild(Node <T> parent, Node <T> current) 
-    {
-        Node<T> child;
-
-        if (current.LNode != null) { 
-            child = current.LNode; 
-        } else { 
-            child = current.RNode; 
-        }
-
-        if (current == root) { 
-            root = child; 
-        } else if (parent.LNode == current) { 
-            parent.LNode = child; 
-        } else { 
-            parent.RNode = child; 
-        } 
-    }
-
-    
 
     // просмотр дерева
-    public void ViewTree() 
+    public void ViewTree()
     {
-        ViewTree(root);
+        ViewTreeL2R(root);
         Console.WriteLine();
     }
-    // рекурсивный метод просмотра поддерева
-    public void ViewTree(Node <T> node) 
-    {
-        if (node == null) return;
-        // просмотр левого поддерева
-        ViewTree(node.LNode);
-        // информация о текущем узле
-        Visit(node);
-        // просмотр правого поддерева
-        ViewTree(node.RNode);
-    }
 
-    private void Visit(Node <T> node) 
+    private void Visit(Node<T> node)
     {
         Console.Write(node.Key + " ");
     }
-
-    // поиск узла с минимальным значением ключа начиная с узла node
-    public Node <T> FindMin(Node <T> node) 
+    
+    /*
+     * Рекурсивные методы просмотра поддерева
+     */
+    
+    // Слева направо
+    public void ViewTreeL2R(Node<T> node)
     {
-        while (node.LNode != null) 
-        {
-            node = node.LNode;
-        }
-        return node;
+        if (node == null) return;
+        // просмотр левого поддерева
+        ViewTreeL2R(node.LNode);
+        // информация о текущем узле
+        Visit(node);
+        // просмотр правого поддерева
+        ViewTreeL2R(node.RNode);
     }
-    // поиск узла с максимальным значением ключа начиная с узла node
-    public Node <T> FindMax(Node <T> node) 
+
+    // Справа налево
+    public void ViewTreeR2L(Node<T> node)
     {
-        while (node.RNode != null)
-        {
-            node = node.RNode;
-        }
-        return node;return new Node<T>();
+        if (node == null) return;
+        // просмотр правого поддерева
+        ViewTreeL2R(node.RNode);
+        // информация о текущем узле
+        Visit(node);
+        // просмотр левого поддерева
+        ViewTreeR2L(node.LNode);
     }
     
-    // поиск узла со следующим значением ключа чем t.key
-    public Node <T> Next(Node <T> t) 
+    // Водопадный
+    public void ViewTreeW(Node<T> node)
     {
-        if (t == null)
+        if (node == null) return;
+        // информация о текущем узле
+        Visit(node);
+        // просмотр правого поддерева
+        ViewTreeL2R(node.RNode);            
+        // просмотр левого поддерева
+        ViewTreeW(node.LNode);
+    }
+    
+    
+    public void TraversalMinToMax()
+    {
+        Node<T> current = FindMin(root);
+        while (current != null)
         {
-            return null;
+            Visit(current);
+            current = Next(current);
         }
+        Console.WriteLine();
+    }
+    
+    
+    public void TraversalMaxToMin()
+    {
+        Node<T> current = FindMax(root);
+        while (current != null)
+        {
+            Visit(current);
+            current = Prev(current);
+        }
+        Console.WriteLine();
+    }
+
+    // поиск узла с минимальным значением ключа начиная с узла node
+    public Node<T> FindMin(Node<T> node)
+    {
+        while (node.LNode != null) node = node.LNode;
+        return node;
+    }
+
+    // поиск узла с максимальным значением ключа начиная с узла node
+    public Node<T> FindMax(Node<T> node)
+    {
+        while (node.RNode != null) node = node.RNode;
+        return node;
+    }
+
+    // поиск узла со следующим значением ключа чем t.key
+    public Node<T> Next(Node<T> t)
+    {
+        if (t == null) return null;
 
         if (t.RNode != null)
-        {
             // tut minimum()
             return FindMin(t.RNode);
-        }
-        Node <T> y = t.Parent;
-        while (y != null && t == y.RNode) 
+        var y = t.Parent;
+        while (y != null && t == y.RNode)
         {
             t = y;
             y = y.Parent;
         }
-        return y;
 
+        return y;
     }
     
+    // поиск узла с предыдущем значением ключа чем t.key
+    public Node<T> Prev(Node<T> t)
+    {
+        if (t == null) return null;
+        
+        if (t.LNode != null) return FindMax(t.LNode);
+        
+        Node<T> current = t;
+        Node<T> parent = current.Parent;
+        
+        while (parent != null && current == parent.LNode)
+        {
+            current = parent;
+            parent = parent.Parent;
+        }
+        return parent;
+    }
+
     // TODO: Левый и правый повороты (см. книгу Кормена)
 
     public void RotateLeft(Node<T> node)
@@ -236,8 +358,8 @@ public class BinaryTree <T> where T : IComparable
         Node<T> pivot = node.RNode;
         node.RNode = pivot.LNode;
 
-        if (node.RNode != null)
-            node.RNode.Parent = node;
+        if (pivot.LNode != null)
+            pivot.LNode.Parent = node;
 
         pivot.Parent = node.Parent;
 
@@ -251,7 +373,7 @@ public class BinaryTree <T> where T : IComparable
         pivot.LNode = node;
         node.Parent = pivot;
     }
-    
+
     public void RotateRight(Node<T> node)
     {
         if (node == null || node.LNode == null)
@@ -260,20 +382,19 @@ public class BinaryTree <T> where T : IComparable
         Node<T> pivot = node.LNode;
         node.LNode = pivot.RNode;
 
-        if (node.LNode != null)
-            node.LNode.Parent = node;
+        if (pivot.RNode != null)
+            pivot.RNode.Parent = node;
 
         pivot.Parent = node.Parent;
 
         if (node.Parent == null)
             root = pivot;
-        else if (node == node.Parent.LNode)
-            node.Parent.LNode = pivot;
-        else
+        else if (node == node.Parent.RNode)
             node.Parent.RNode = pivot;
+        else
+            node.Parent.LNode = pivot;
 
         pivot.RNode = node;
         node.Parent = pivot;
     }
-    
 }

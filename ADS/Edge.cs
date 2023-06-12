@@ -7,10 +7,10 @@ public class Edge
     public Vertex Source;
 
     // Конечная вершина
-    public Vertex Destination;  
+    public Vertex Destination;
 
     // Длина ребра
-    public double Distance; 
+    public double Distance;
 
     // Конструктор
     public Edge(Vertex begin, Vertex end, double distance)

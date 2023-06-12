@@ -27,7 +27,7 @@ public class Graph
     }
 
 
-    public List<Vertex> BFS(Vertex startVertex, Vertex endVertex)
+    public Dictionary<Vertex, Vertex> BFS(Vertex startVertex, Vertex endVertex)
     {
         
         Queue<Vertex> Queue = new Queue<Vertex>();
@@ -54,128 +54,69 @@ public class Graph
         Queue.Enqueue (startVertex);
         
         Vertex current, v;
-        Edge tr;
         List<Edge> edges_u;
         
         // Основной цикл
         while (Queue.Count > 0)
         {
             current = Queue.Dequeue();
-            if (current.Equals(endVertex)) break;
-
-            foreach (Edge edge in current.GetEdges())
+            if (current.Equals(endVertex) && endVertex != null) break;
+            edges_u = current.GetEdges();
+            current.IsVisited = true;
+            
+            foreach (Edge edge in edges_u)
             {
                 v = edge.Destination;
                 if (!v.IsVisited)
                 {
-                    path[v] = current;
+                    path[current] = v;
                     Queue.Enqueue(v);
                     visited.Add(v);
                     v.IsVisited = true;
                 }
-                
             }
-            
-            
         }
-
-        // // Mark all vertices as not visited
-        // foreach (Vertex vert in Vertices)
-        // {
-        //     vert.IsVisited = false;
-        // }
-        //
-        // // Create a queue for BFS
-        // Queue<Vertex> queue = new Queue<Vertex>();
-        //
-        // // Mark the current vertex as visited and enqueue it
-        // startVertex.IsVisited = true;
-        // queue.Enqueue(startVertex);
-        //
-        // // Create a dictionary to store the path
-        // Dictionary<Vertex, Vertex> path = new Dictionary<Vertex, Vertex>();
-        //
-        // while (queue.Count > 0)
-        // {
-        //     // Dequeue a vertex from the queue
-        //     Vertex currentVertex = queue.Dequeue();
-        //
-        //     // Get the adjacent vertices of the current vertex
-        //     List<Edge> edges = currentVertex.GetEdges();
-        //     foreach (Edge edge in edges)
-        //     {
-        //         Vertex adjacentVertex = edge.Destination;
-        //         if (!adjacentVertex.IsVisited)
-        //         {
-        //             // Mark the adjacent vertex as visited, enqueue it, and store the path
-        //             adjacentVertex.IsVisited = true;
-        //             queue.Enqueue(adjacentVertex);
-        //             path[adjacentVertex] = currentVertex;
-        //         }
-        //     }
-        // }
-
-        
-
-        
-
-        return visited;
+        return path;
     }
 
     // Depth-First Search
-    public List<Vertex> DFS(Vertex startVertex)
+    public Dictionary<Vertex, Vertex> DFS(Vertex startVertex, Vertex endVertex = null)
     {
-        // Mark all vertices as not visited
+        Stack<Vertex> stack = new Stack<Vertex>();
+        
+        // Инициализация
         foreach (Vertex vert in Vertices)
         {
             vert.IsVisited = false;
+            vert.PrevVertex = null;
         }
 
-        // Create a dictionary to store the path
+        // Путь
         Dictionary<Vertex, Vertex> path = new Dictionary<Vertex, Vertex>();
-
-        // Call the recursive helper function
-        DFSUtil(startVertex, path);
-
-        // Build the path as a list of vertices
-        List<Vertex> result = new List<Vertex>();
-        Vertex vertex = startVertex;
-        while (vertex != null)
+        
+        Vertex v = startVertex;
+        stack.Push(v);
+        
+        while (stack.Count > 0)
         {
-            result.Add(vertex);
-            if (path.ContainsKey(vertex))
+            v = stack.Pop();
+            if (!v.IsVisited)
             {
-                vertex = path[vertex];
-            }
-            else
-            {
-                vertex = null;
+                v.IsVisited = true;
+                 
+                foreach (var edge in v.GetEdges())
+                {
+                    stack.Push(edge.Destination);
+                    path[v] = edge.Destination;
+                    if (edge.Destination == endVertex && endVertex != null) return path;
+                }
             }
         }
 
-        result.Reverse(); // Reverse the list to get the correct path order
-
-        return result;
+        return path;
     }
 
-    private void DFSUtil(Vertex vertex, Dictionary<Vertex, Vertex> path)
-    {
-        // Mark the current vertex as visited
-        vertex.IsVisited = true;
-
-        // Get the adjacent vertices of the current vertex
-        List<Edge> edges = vertex.GetEdges();
-        foreach (Edge edge in edges)
-        {
-            Vertex adjacentVertex = edge.Destination;
-            if (!adjacentVertex.IsVisited)
-            {
-                // Store the path and recursively call the DFSUtil function on the adjacent vertex
-                path[adjacentVertex] = vertex;
-                DFSUtil(adjacentVertex, path);
-            }
-        }
-    }
+    
 
     private List<Vertex> GetPath(Dictionary<Vertex, Vertex> parents, Vertex start, Vertex end)
     {

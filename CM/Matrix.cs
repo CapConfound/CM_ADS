@@ -327,61 +327,106 @@ class Matrix
         }
         return x;
     }
+    
+    public static Vector Gauss(Matrix mat, Vector b)
+    {
+        Matrix A = mat.Copy();
+        Vector B = b.Copy();
+        int rows = A.Rows;
+        
+        if (rows != B.Size || rows != A.columns) throw new Exception("Не совпадает размерность!");
+        
+        for (int k = 0; k < rows; k++)
+        {
+            double maxElement = Math.Abs(A[k, k]);
+            int maxIndexRow = k;
+            
+            for (int i = k + 1; i < rows; i++)
+            {
+                if (Math.Abs(A[i, k]) > maxElement)
+                {
+                    maxElement = Math.Abs(A[i, k]);
+                    maxIndexRow = i;
+                }
+            }
+            
+            /// Проверка на ненулевое элемент
+            if (maxElement < 0.00000001)
+            {
+                throw new Exception("Матрицы невозможно перемножить");
+            }
+            //Меняем местами строки
+            for (int j = k; j < rows; j++)
+            {
+                double tmp = A[maxIndexRow, j];
+                A[maxIndexRow, j] = A[k, j];
+                A[k, j] = tmp;
+                
+            }
+            
+            //Меняем местами значения вектора B
+            double temp = B[maxIndexRow];
+            B[maxIndexRow] = B[k];
+            B[k] = temp;
+            
+
+            //Проходим по всем строкам после k-ой
+            for (int i = 0; i < rows; i++)
+            {
+                if (i == k) continue;
+                double value = A[i, k] / A[k, k];
+                for (int j = k; j < rows; j++)
+                    A[i, j] -= A[k, j] * value;
+                B[i] -= B[k] * value;
+            }
+        }
+        return TopTriangle(A, B);
+    }
 
     // TODO: Вычисление обратной матрицы Метод Гаусса
-    public static Matrix InvertedG(Matrix m)
+    public static Matrix InvertedG(Matrix mat)
     {
-        if (m.rows != m.columns)
-            throw new Exception("Матрица должна быть квадратной");
+        int rows = mat.rows;
+        int columns = mat.columns;
+        if (rows != columns) return null;
+        Matrix aCopy = mat.Copy();
+        Matrix result = new Matrix(rows, columns);
+        Matrix E = new Matrix(rows, columns);
         
-        int n = m.rows;
-        
-        Matrix result = new Matrix(m.rows, m.columns);
-        
-        for (int i = 0; i < n; i++)
-            result[i, i] = 1;
+        for (int i = 0; i < rows; i++)
+            E[i, i] = 1;
 
-        double[,] Matrix_Big = new double[n, 2*n]; //Общая матрица, получаемая скреплением Начальной матрицы и единичной
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++)
+        double eps = 0.000001;
+        int max;
+        
+        for (int j = 0; j < columns; j++)
+        {
+            max = j;
+            for (int i = j + 1; i < rows; i++)
+                if (Math.Abs(aCopy[i, j]) > Math.Abs(aCopy[max, j])) { max = i; };
+
+            if (max != j)
             {
-                Matrix_Big[i, j] = m[i, j];
-                Matrix_Big[i, j + n] = result[i, j];
+                Vector temp = aCopy.GetRow(max); aCopy.SetRow(max, aCopy.GetRow(j)); aCopy.SetRow(j, temp);
+                Vector tmp = E.GetRow(max); E.SetRow(max, E.GetRow(j)); E.SetRow(j, tmp);
             }
 
-        //Прямой ход (Зануление нижнего левого угла)
-        for (int k = 0; k < n; k++) //k-номер строки
-        {
-            for (int i = 0; i < 2*n; i++) //i-номер столбца
-                Matrix_Big[k, i] /= m[k, k]; //Деление k-строки на первый член !=0 для преобразования его в единицу
-            for (int i = k + 1; i < n; i++) //i-номер следующей строки после k
+            if (Math.Abs(aCopy[j, j]) < eps) return null;
+
+            for (int i = j + 1; i < rows; i++)
             {
-                double K = Matrix_Big[i, k] / Matrix_Big[k, k]; //Коэффициент
-                for (int j = 0; j < 2*n; j++) //j-номер столбца следующей строки после k
-                    Matrix_Big[i, j] -= Matrix_Big[k, j] * K; //Зануление элементов матрицы ниже первого члена, преобразованного в единицу
-            }
-            for (int i = 0; i < n; i++) //Обновление, внесение изменений в начальную матрицу
-                for (int j = 0; j < n; j++)
-                    m[i, j] = Matrix_Big[i, j];
-        }
-        
-        //Обратный ход (Зануление верхнего правого угла)
-        for (int k = n - 1; k > -1; k--) //k-номер строки
-        {
-            for (int i = 2*n - 1; i > -1; i--) //i-номер столбца
-                Matrix_Big[k, i] = Matrix_Big[k, i] / m[k, k];
-            for (int i = k - 1; i > -1; i--) //i-номер следующей строки после k
-            {
-                double K = Matrix_Big[i, k] / Matrix_Big[k, k];
-                for (int j = 2*n - 1; j > -1; j--) //j-номер столбца следующей строки после k
-                    Matrix_Big[i, j] = Matrix_Big[i, j] - Matrix_Big[k, j] * K;
+                double multiplier = -aCopy[j, j] / aCopy[i, j];
+                for (int k = 0; k < columns; k++)
+                {
+                    aCopy[i, k] *= multiplier;
+                    aCopy[i, k] += aCopy[j, k];
+                    E[i, k] *= multiplier;
+                    E[i, k] += E[j, k];
+                }
             }
         }
-
-        //Отделяем от общей матрицы
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++)
-                result[i, j] = Matrix_Big[i, j + n];
+        for (int i = 0; i < columns; i++)
+            result.SetColumn(i, TopTriangle(aCopy, E.GetColumn(i)));
 
         return result;
     }

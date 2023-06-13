@@ -1,64 +1,82 @@
 namespace CM_ADS;
 
 
-public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
+public class DoubleLinkedList<K, T> where K : IComparable where T : IComparable
 {
-    private List<K, T> _first = null; // Ссылка на начальный узел
+    private TwoWayList<K, T> _first = null; // Ссылка на начальный узел
+    private TwoWayList<K, T> _last = null; // Ссылка на последний узел
     private int _pos = 0;
 
-    
+
     // Свойство
-    public List<K, T> First 
+    public TwoWayList<K, T> First 
     {
         get { return _first; }
+    }
+
+    // Свойство
+    public TwoWayList<K, T> Last
+    {
+        get { return _last; }
     } 
     
     //Конструктор
-    public SingleLinkedList()
+    public DoubleLinkedList()
     {
         _first = null;
+        _last = null;
         _pos = 0;
     }
 
     public int Count // Свойство
     {
-        get {return _pos;}
+        get { return _pos; }
     }
     
     // Добавить в начало
     public int AddStart(K key, T value)
     {
-        List<K, T> s = new List<K, T>(key, value);
+        TwoWayList<K, T> s = new TwoWayList<K, T>(key, value);
+        if (_first == null)
+        {
+            _first = s;
+            _last = s;
+            return ++_pos;
+        }
+        
         s.Next = _first;
-        _first = s;            
-        return this._pos++;
+        _first = s;
+        return ++_pos;
     }
 
     // Добавить в конец
     public int AddEnd(K key, T value)
     {
-        List<K, T> s = new List<K, T>(key, value);
+        TwoWayList<K, T> s = new TwoWayList<K, T>(key, value);
         
         // Если список пустой    
-        if (this._first == null) { this._first = s; return this._pos++; }
+        if (_first == null)
+        {
+            _first = s;
+            _last = s;
+            return _pos++;
+        }
         
         // Поиск последнего узла
-        List<K, T> e = this._first;
-        while (e.Next != null)
-        {
-            e = e.Next;
-        }
-
-        // Добавление в конец
-        e.Next = s;
+        TwoWayList<K, T> l = _last;
         
-        return this._pos++;
+        _last.Next = s;
+        _last.Next.Prev = _last;
+        _last = s;
+
+        return _pos++;
     }
 
     // Очистка списка
     public void Clear()
     {
         _first = null;
+        _last = null;
         _pos = 0;
     }
 
@@ -67,7 +85,7 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     {
         if (_first != null)
         {
-            List<K, T> e = _first;
+            TwoWayList<K, T> e = _first;
             do
             {
                 if (e.Value.CompareTo(value) == 0)
@@ -84,7 +102,7 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     {
         if (this._first == null || this.Count < k) return new ListItem<K, T>();
         
-        List<K, T> e = this._first;
+        TwoWayList<K, T> e = this._first;
 
         for (int i = 0; i < k; i++)
             e = e.Next;
@@ -92,7 +110,7 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
         return e;
     }
 
-    public void PrintList()
+    public void PrintTwoWayList()
     {
         for (int k = 0; k < Count; k++)
         {
@@ -104,20 +122,20 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     }
     
     // вставка после заданного узла
-    public int AddAfter(int k, List<K, T> item)
+    public int AddAfter(int k, TwoWayList<K, T> item)
     {
         if (this._first == null || this.Count < k)
         {
             AddStart(item.Key, item.Value);
-            return this._pos;
+            return _pos;
         }
 
-        List<K, T> e = this._first;
+        TwoWayList<K, T> e = this._first;
 
         for (int i = 0; i < k; i++)
             e = e.Next;
 
-        List<K, T> temp = e.Next;
+        TwoWayList<K, T> temp = e.Next;
 
         
         e.Next = item;  
@@ -127,7 +145,7 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     }
 
     // Вставка перед заданным узлом
-    public int AddBefore(int k, List<K, T> item)
+    public int AddBefore(int k, TwoWayList<K, T> item)
     {
         if (_first == null || Count < k)
         {
@@ -135,19 +153,16 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
             return _pos;
         }
 
-        List<K, T> e = _first;
+        TwoWayList<K, T> e = _first;
 
         for (int i = 0; i < k; i++)
-        {
-            if (e.Next.Key.Equals(k))
-                break;
             e = e.Next;
-        }
         
-        List<K, T> temp = e.Next;
         
-        e.Next = item;  
-        item.Next = temp; 
+        TwoWayList<K, T> temp = e.Prev;
+        
+        e.Prev = item;  
+        item.Prev = temp; 
         
         return _pos++;
     }
@@ -155,7 +170,7 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     // Удаление начального узла 
     public int DelStart()
     {
-        List<K, T> e;
+        TwoWayList<K, T> e;
         
         if ((e = _first) == null) return 0;
 
@@ -175,14 +190,17 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     {
         if (_first == null) return 0;
         
+        _last = _last.Prev;
+        _last.Next = null;
+        
         return _pos--;
     }
 
     // Копирование списка в другую переменную
-    public SingleLinkedList<K, T> Copy()
+    public DoubleLinkedList<K, T> Copy()
     {
-        SingleLinkedList<K, T> result = new SingleLinkedList<K, T>();
-        List<K, T> elem = _first;
+        DoubleLinkedList<K, T> result = new DoubleLinkedList<K, T>();
+        TwoWayList<K, T> elem = _first;
         while (elem.Next != null)
         {
             result.AddStart(elem.Key, elem.Value);
@@ -195,10 +213,10 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     // Переворот списка
     public void Flip()
     {
-        SingleLinkedList<K, T> temp = Copy();
+        DoubleLinkedList<K, T> temp = Copy();
         Clear();
         
-        List<K, T> elem = temp._first;
+        TwoWayList<K, T> elem = temp._first;
         for (int k = 0; k < temp.Count; k++)
         {
             AddEnd(elem.Key, elem.Value);

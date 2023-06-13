@@ -149,23 +149,21 @@ class Sort {
         }
     }
 
-    // TODO: quick sort
+    // quick sort
     public static void Quicksort<T> (T[] array, int leftIndex, int rightIndex) where T : IComparable
     {
-        var i = leftIndex;
-        var j = rightIndex;
-        var pivot = array[leftIndex];
+        int i = leftIndex;
+        int j = rightIndex;
+        T pivot = array[leftIndex];
+        
         while (i <= j)
         {
             while (pivot.CompareTo(array[i]) > 0) //(array[i] < pivot)
-            {
                 i++;
-            }
             
             while (array[j].CompareTo(pivot) > 0) // (array[j] > pivot)
-            {
                 j--;
-            }
+            
             if (i <= j)
             {
                 T temp = array[i];
@@ -178,6 +176,7 @@ class Sort {
         
         if (leftIndex < j)
             Quicksort(array, leftIndex, j);
+        
         if (i < rightIndex)
             Quicksort(array, i, rightIndex);
     }
@@ -193,37 +192,27 @@ class Sort {
         int k = left;
         
         for (i = 0; i < leftArrayLength; ++i)
-        {
             leftTempArray[i] = array[left + i];
-        }
+        
         for (j = 0; j < rightArrayLength; ++j)
-        {
             rightTempArray[j] = array[middle + 1 + j];
-        }
+        
         i = 0;
         j = 0;
         
         while (i < leftArrayLength && j < rightArrayLength)
         {
             if (rightTempArray[j].CompareTo(leftTempArray[i]) >= 0) // (leftTempArray[i] <= rightTempArray[j])
-            {
                 array[k++] = leftTempArray[i++];
-            } 
-            else 
-            {
+            else
                 array[k++] = rightTempArray[j++];
-            }
         }
         
         while (i < leftArrayLength)
-        {
             array[k++] = leftTempArray[i++];
-        }
         
         while (j < rightArrayLength)
-        {
             array[k++] = rightTempArray[j++];
-        }
     }
 
     public static void MergeSortR<T> (T[] array, int left, int right) where T : IComparable
@@ -251,13 +240,11 @@ class Sort {
         // subarrays of size 2 to create
         // sorted subarrays of size 4, and
         // so on.
-        // 
         for (curr_size = 1; curr_size <= n - 1; curr_size = 2 * curr_size)
         {
             // Pick starting point of different
             // subarrays of current size
-            for (left_start = 0; left_start < n - 1;
-                        left_start += 2 * curr_size)
+            for (left_start = 0; left_start < n - 1; left_start += 2 * curr_size)
             {
                 // Find ending point of left
                 // subarray. mid+1 is starting

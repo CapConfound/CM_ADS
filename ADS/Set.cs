@@ -98,13 +98,6 @@ class Set<T> where T : IComparable
         return ss;
     }
 
-	// public override string ToString()
-    // {
-    //     T[] temp = new T[count];
-    //     for (int i = 0; i < count; i++) temp[i] = data[i];
-    //     return "{" + string.Join(";", temp) + "}";
-    // }
-
     public Set<T> Union(Set<T> ss)
     {
         int nn = this.n + ss.GetSize();

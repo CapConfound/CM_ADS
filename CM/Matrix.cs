@@ -61,6 +61,7 @@ class Matrix
 
     public static void PrintMatrix(Matrix m)
     {
+        if (m == null) return;
         int n = m.rows;
         for (int i = 0; i < n; i++)
         {
@@ -425,8 +426,14 @@ class Matrix
                 }
             }
         }
+
+        Vector column = new Vector(columns);
         for (int i = 0; i < columns; i++)
-            result.SetColumn(i, TopTriangle(aCopy, E.GetColumn(i)));
+        {
+            column = TopTriangle(aCopy, E.GetColumn(i));
+            if (column == null) return null;
+            result.SetColumn(i, column);
+        }
 
         return result;
     }
@@ -551,33 +558,34 @@ class Matrix
     }
     
     // метод последовательных приблежений
-    public static Vector IterativeApprox(Matrix mat, Vector b)
+    public Vector IterativeApprox(Matrix mat, Vector b)
     {
         if (mat.Rows != mat.Columns || mat.Rows != b.Size)
             return null;
 
         int n = mat.Rows;
-        double eps = 0.000001;
+        double eps = 0.0000001;
         int max;
 
-        for (int j = 0; j < n; j++)
+        for (int i = 0; i < n; i++)
         {
-            max = j;
-            for (int i = j + 1; i < n; i++)
-                if (Math.Abs(mat[i, j]) > Math.Abs(mat[max, j])) max = i;
+            max = i;
+            for (int j = i + 1; j < n; j++)
+                // Поиск максимума
+                if (Math.Abs(mat[j, i]) > Math.Abs(mat[max, i])) max = j;
 
-            if (max != j)
+            if (max != i)
             {
-                mat.SetRow(max, mat.GetRow(j));
-                mat.SetRow(j, mat.GetRow(max));
+                mat.SetRow(max, mat.GetRow(i));
+                mat.SetRow(i, mat.GetRow(max));
                 
                 double tmp;
                 tmp = b[max];
-                b[max] = b[j];
-                b[j] = tmp;
+                b[max] = b[i];
+                b[i] = tmp;
             }
             
-            if (Math.Abs(mat[j, j]) < eps) return null;
+            if (Math.Abs(mat[i, i]) < eps) return null;
         }
 
         Matrix alpha = new Matrix(n, n); 

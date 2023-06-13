@@ -41,15 +41,15 @@ public class TestCM
                 break;    
             
             case "4":
-                TestSquaures();
+                TestMNK();
                 break;    
             
             case "5":
-                TestSpline();
+                TestIntegral();
                 break;    
             
             case "6":
-                TestSpline();
+                TestDiff();
                 break;    
             
             default:
@@ -78,10 +78,13 @@ public class TestCM
         double[,] m = {{4, 2, 1}, {4,1,4}, {3,2,1}};
         Matrix m1 = new Matrix(m);
 
-        Console.WriteLine("Обратная матрица методом Гаусса-Жордана");
         Matrix mG = new Matrix(3, 3);
         mG = Matrix.InvertedG(m1);
-        Matrix.PrintMatrix(mG);
+        if (mG != null)
+        {
+            Console.WriteLine("Обратная матрица методом Гаусса-Жордана");
+            Matrix.PrintMatrix(mG);
+        }
 
         Console.WriteLine("Givens");
         double[,] gg = { { 4, 2, 5 }, { 3, 5, 4 }, {7, 1, 8}};
@@ -96,35 +99,27 @@ public class TestCM
         }
         Console.WriteLine("");
         
-        // Console.WriteLine("Обратная матрица. Метод квадратных корней");
-        
 
         Console.WriteLine("MPP");
-        TestMPP();
+        double[,] ppv = {{10, 2, -1}, {-2, -6, -1}, {1, -3, 12}};
+        Matrix pp = new Matrix(ppv);
+        double[] vv = { 5, 24.42, 36 };
+        Vector vec = new Vector(vv);
+        Vector res = pp.IterativeApprox(pp, vec);
+
+        for (int i = 0; i < res.Size; i++)
+        {
+            Console.Write(res[i] + " ");
+        }
     }
 
     private static void TestSpline()
     {
     }
 
-    private static void TestSquaures()
+    private static void TestMNK()
     {
-    }
-
-    private static void TestMPP()
-    {
-        Vector x = new Vector(new double[] { 0, 5, 10, 15, 20, 25 });
-        Vector y = new Vector(new double[] { 21, 39, 51, 63, 70, 90 });
-        MNK.FuncPsi[] psiArray = new MNK.FuncPsi[] { x => 1, x => x };
-
-        Console.WriteLine($"X: {x}");
-        Console.WriteLine($"Y: {y}");
-        Console.WriteLine("Функция 1 = 1");
-        Console.WriteLine("Функция 2 = x");
-
-        MNK func = new MNK(x, y, psiArray);
-        Console.WriteLine("Параметры: {0}", func.Params);
-        Console.WriteLine("Критерий: {0}", func.GetCriteria());
+        
     }
 
 

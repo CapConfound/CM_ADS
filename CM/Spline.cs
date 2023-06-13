@@ -6,6 +6,8 @@ class Spline
 {
     private Vector _x;
     private Vector _y;
+    
+    // Длина диагонали
     private int _n;
     private Vector _a;
     private Vector _b;
@@ -23,7 +25,7 @@ class Spline
             throw new IOException("Размеры векторов не совпадают");
         }
         
-        _n = x.Size - 1; // число интервалов
+        _n = x.Size - 1;
         _c = new Vector(_n);
         
         FindParams();
@@ -31,109 +33,60 @@ class Spline
 
     private void FindParams()
     {
-        Vector a = FindA();
+        _a = new Vector(_n);
+        for (int i = 0; i < _n; i++)
+            _a[i] = _y[i + 1];
         
-        Vector h = FindH();
+        //Формируем вектор h
+        Vector h = new Vector(_n);
+        for (int i = 1; i <= _n; i++)
+            h[i - 1] = _x[i] - _x[i - 1];
+     
+        //Нижняя диагональ
+        Vector underDia = new Vector(_n - 1);
+        for (int i = 1; i < _n - 1; i++)
+            underDia[i] = h[i];
+        underDia[0] = 0;
         
-        Vector C = FindC(h);
+        // Главная диагональ
+        Vector mainDia = new Vector(_n - 1);
+        for (int i = 0; i < _n - 1; i++)
+            mainDia[i] = 2 * (h[i] + h[i + 1]);
         
-        Vector D = FindD(h);
-        
-        Vector E = FindE(h);
+        //Верхняя диагональ
+        Vector overDia = new Vector(_n - 1);
+        for (int i = 0; i < _n - 2; i++)
+            overDia[i] = h[i + 1];
+        overDia[_n - 2] = 0;
         
         //Вектор правых частей
-        Vector B = new Vector(Count() - 1);
+        Vector F = new Vector(_n - 1);
         for (int i = 0; i < Count() - 1; i++)
-        {
-            B[i] = 6 * ((_y[i + 2] - _y[i + 1]) / h[i + 1]) - ((_y[i + 1] - _y[i]) / h[i]);
-        }
-        Vector rp = Matrix.Sweep( C, D, E, B);
+            F[i] = 6 * ((_y[i + 2] - _y[i + 1]) / h[i + 1]) - ((_y[i + 1] - _y[i]) / h[i]);
+
+        Vector rp = Matrix.Sweep(overDia, mainDia, underDia, F);
+        
         for (int i = 0; i < Count() - 1; i++)
         {
             _c[i] = rp[i];
         }
         
-        //Находим параметр d
         _d = new Vector(Count());
+        
         for (int i = 0; i < Count(); i++)
         {
             if (i == 0)
-            {
                 _d[i] = (_c[i]) / h[i];
-            }
             else
-            {
                 _d[i] = (_c[i] - _c[i - 1]) / h[i];
-            }
         }
-        //Находим параметр b
+        
         _b = new Vector(Count());
+        
         for (int i = 0; i < Count(); i++)
         {
             _b[i] = h[i] / 2 * _c[i] - h[i] * h[i] / 6 * _d[i] + (_y[i + 1] - _y[i]) / h[i];
         }
     }
 
-    private Vector FindE(Vector h)
-    {
-        //Верхняя диагональ
-        Vector E = new Vector(Count() - 1);
-        for (int i = 0; i < Count() - 2; i++)
-        {
-            E[i] = h[i + 1];
-        }
-
-        E[Count() - 2] = 0;
-        return E;
-    }
-
-    private Vector FindD(Vector h)
-    {
-        //Средняя диагональ
-        Vector D = new Vector(Count() - 1);
-        for (int i = 0; i < Count() - 1; i++)
-        {
-            D[i] = 2 * (h[i] + h[i + 1]);
-        }
-
-        return D;
-    }
-
-    private Vector FindC(Vector h)
-    {
-        //Нижняя диагональ
-        Vector C = new Vector(Count() - 1);
-        for (int i = 1; i < Count() - 1; i++)
-        {
-            C[i] = h[i];
-        }
-
-        C[0] = 0;
-        return C;
-    }
-
-    private Vector FindH()
-    {
-        Vector h = new Vector(Count());
-        for (int i = 1; i <= Count(); i++)
-        {
-            h[i - 1] = _x[i] - _x[i - 1];
-        }
-
-        return h;
-    }
-
-    private Vector FindA()
-    {
-        int n = Count();
-        Vector h = new Vector(n);
-        
-        _a = new Vector(n);
-        for (int i = 0; i < n; i++)
-        {
-            _a[i] = _y[i + 1];
-        }
-
-        return h;
-    }
 }

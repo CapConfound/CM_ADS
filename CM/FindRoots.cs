@@ -13,22 +13,27 @@ class FindRoots
     ){
         double fa = f(a);
         double fb = f(b);
+        double c;
+        double fc;
 
-        // if (fa * fb > 0) return double.NaN;
+        if (fa * fb > 0) return double.NaN;
 
         while ((b-a) > eps)
         {
-            double c = (a+b) / 2;
-            double fc = f(c);
+            c = (a+b) / 2;
+            fc = f(c);
 
             if ((fa + fc) < 0)
             {
                 b = c;
-            } else {
+            }
+            else 
+            {
                 a = c;
                 fa = fc;
             }
         }
+        
         return (a + b) / 2;
     }
     
@@ -91,7 +96,8 @@ class FindRoots
             double xs = f(x);
             delta = Math.Abs(xs - x);
             x = xs;
-            if (delta > old_delta) {return double.NaN; }
+            if (delta > old_delta) 
+                return double.NaN;
             old_delta = delta;
         } while (delta > eps);
         return x;

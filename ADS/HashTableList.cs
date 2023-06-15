@@ -2,7 +2,7 @@ namespace CM_ADS;
 
 public class HashTableList<TKey, TValue> where TKey : IComparable where TValue : IComparable
 {
-    private List<KeyValuePair<TKey, TValue>> _items;
+    private LinkedList<KeyValuePair<TKey, TValue>>[] _items;
 
     private int _count;
     
@@ -20,7 +20,7 @@ public class HashTableList<TKey, TValue> where TKey : IComparable where TValue :
     {
         _capacity = DefaultCapacity;
         _count = 0;
-        _items = new List<KeyValuePair<TKey, TValue>>(_capacity);
+        _items = new LinkedList<KeyValuePair<TKey, TValue>>[_capacity];
     }
 
     // Создает новую хеш-таблицу указанной емкости
@@ -28,7 +28,8 @@ public class HashTableList<TKey, TValue> where TKey : IComparable where TValue :
     {
         _capacity = capacity;
         _count = 0;
-        _items = new List<KeyValuePair<TKey, TValue>>(_capacity);
+        _items = new LinkedList<KeyValuePair<TKey, TValue>>[_capacity];
+
     }
 
     public int GetSize()
@@ -48,16 +49,18 @@ public class HashTableList<TKey, TValue> where TKey : IComparable where TValue :
         // Находим индекс слота, в который нужно добавить новый элемент
         int index = GetIndex(key);
 
+
         // Если ключ уже существует, заменяем значение
-        if (_items[index].Key != null && _items[index].Key.Equals(key))
+        if (_items[index] != null)
         {
-            _items[index] = new KeyValuePair<TKey, TValue>(key, value);
+            _items[index].AddLast(new KeyValuePair<TKey, TValue>(key, value));
         }
         else // В противном случае добавляем новую пару ключ-значение
         {
-            _items[index] = new KeyValuePair<TKey, TValue>(key, value);
-            _count++;
+            _items[index] = new LinkedList<KeyValuePair<TKey, TValue>>();
+            _items[index].AddFirst(new KeyValuePair<TKey, TValue>(key, value));            
         }
+        _count++; // Увеличиваем счетчик элементов
     }
     
     // Удаляет пару ключ-значение из хеш-таблицы
@@ -65,13 +68,21 @@ public class HashTableList<TKey, TValue> where TKey : IComparable where TValue :
     {
         // Находим индекс слота, содержащего удаляемый элемент
         int index = GetIndex (key);
-
+        var item = _items[index];
+        
         // Если ключ существует, удаляем пару ключ-значение
-        if (_items[index].Key != null && _items[index].Key.Equals(key))
+        if (_items[index] != null)
         {
-            _items[index] = new KeyValuePair<TKey, TValue>(default(TKey), default(TValue));
-            _count--;
-            return true;
+            var current = item.First;
+            while (current != null)
+            {
+                if (current.Value.Key.Equals(key))
+                {
+                    item.Remove(current);
+                    return true;
+                }
+                current = current.Next;
+            }
         }
         
         return false;
@@ -83,10 +94,13 @@ public class HashTableList<TKey, TValue> where TKey : IComparable where TValue :
         // Находим индекс слота, содержащего элемент
         int index = GetIndex (key);
 
+
         // Если ключ существует, вернуть его значение
-        if (_items[index].Key != null && _items[index].Key.Equals(key))
+        if (_items[index] != null)
         {
-            return _items[index].Value;
+            foreach (var item in _items[index]) 
+                if (item.Key.Equals(key)) return item.Value;
+
         }
 
         // В противном случае выбрасываем исключение
@@ -97,18 +111,26 @@ public class HashTableList<TKey, TValue> where TKey : IComparable where TValue :
     private void Resize()
     {
         _capacity *= 2;
-        List<KeyValuePair<TKey, TValue>> oldItems = _items;
-        _items = new List<KeyValuePair<TKey, TValue>>(_capacity);
-        _count = 0;
+        // SingleLinkedList<TKey, TValue>[] oldItems = _items;
+        // _items = new SingleLinkedList<TKey, TValue>;
+        var newBuckets = new LinkedList<KeyValuePair<TKey, TValue>>[_capacity];
 
         // Повторно добавляем все элементы в новый массив
-        foreach (KeyValuePair<TKey, TValue> elem in oldItems)
+        foreach (var elem in _items)
         {
-            if (elem.Key!= null)
+            if (elem == null) continue;       
+
+            foreach (var item in elem)
             {
-                Add(elem.Key, elem.Value);
-            }
+                int newIndex = GetIndex(item.Key);
+                if (newBuckets[newIndex] == null)
+                    newBuckets[newIndex] = new LinkedList<KeyValuePair<TKey, TValue>>();
+
+                newBuckets[newIndex].AddLast(item);
+            }   
         }
+
+        _items = newBuckets;
     }
 
     // Возвращает индекс слота, содержащего указанный ключ
@@ -126,32 +148,4 @@ public class HashTableList<TKey, TValue> where TKey : IComparable where TValue :
         return index;
     }
 
-    public List<string> Keys()
-    {
-        List<string> keysList = new List<string>();
-    
-        foreach (KeyValuePair<TKey, TValue> pair in _items)
-        {
-            if (pair.Key == null) continue;
-            keysList.Add((pair.Key).ToString());
-        }
-
-        return keysList;
-
-    }
-
-    public List<string> Values()
-    {
-        List<string> valuesList = new List<string>();
-    
-        foreach (KeyValuePair<TKey, TValue> pair in _items)
-        {
-            if (pair.Value == null) continue;
-            valuesList.Add((pair.Key).ToString());
-        }
-
-        return valuesList;
-
-    }
-    
 }

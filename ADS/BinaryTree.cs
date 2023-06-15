@@ -241,6 +241,7 @@ public class BinaryTree<T> where T : IComparable
     // Слева направо
     public void ViewTreeL2R(Node<T> node)
     {
+        Console.WriteLine("Слево направо");
         if (node == null) return;
         // просмотр левого поддерева
         ViewTreeL2R(node.LNode);
@@ -253,6 +254,7 @@ public class BinaryTree<T> where T : IComparable
     // Справа налево
     public void ViewTreeR2L(Node<T> node)
     {
+        Console.WriteLine("Справа налево");
         if (node == null) return;
         // просмотр правого поддерева
         ViewTreeL2R(node.RNode);
@@ -265,6 +267,7 @@ public class BinaryTree<T> where T : IComparable
     // Водопадный
     public void ViewTreeW(Node<T> node)
     {
+        Console.WriteLine("Обход сверху вниз");
         if (node == null) return;
         // информация о текущем узле
         Visit(node);
@@ -277,6 +280,7 @@ public class BinaryTree<T> where T : IComparable
     
     public void TraversalMinToMax()
     {
+        Console.WriteLine("От min до max");
         Node<T> current = FindMin(root);
         while (current != null)
         {
@@ -289,6 +293,7 @@ public class BinaryTree<T> where T : IComparable
     
     public void TraversalMaxToMin()
     {
+        Console.WriteLine("От max до min");
         Node<T> current = FindMax(root);
         while (current != null)
         {

@@ -1,14 +1,14 @@
 namespace CM_ADS;
 
 
-public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
+public class SingleLinkedList<TKey, TValue> where TKey : IComparable where TValue : IComparable
 {
-    private List<K, T> _first = null; // Ссылка на начальный узел
+    private List<TKey, TValue> _first = null; // Ссылка на начальный узел
     private int _pos = 0;
 
     
     // Свойство
-    public List<K, T> First 
+    public List<TKey, TValue> First 
     {
         get { return _first; }
     } 
@@ -26,24 +26,24 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     }
     
     // Добавить в начало
-    public int AddStart(K key, T value)
+    public int AddStart(TKey key, TValue value)
     {
-        List<K, T> s = new List<K, T>(key, value);
+        List<TKey, TValue> s = new List<TKey, TValue>(key, value);
         s.Next = _first;
         _first = s;            
         return this._pos++;
     }
 
     // Добавить в конец
-    public int AddEnd(K key, T value)
+    public int AddEnd(TKey key, TValue value)
     {
-        List<K, T> s = new List<K, T>(key, value);
+        List<TKey, TValue> s = new List<TKey, TValue>(key, value);
         
         // Если список пустой    
         if (this._first == null) { this._first = s; return this._pos++; }
         
         // Поиск последнего узла
-        List<K, T> e = this._first;
+        List<TKey, TValue> e = this._first;
         while (e.Next != null)
         {
             e = e.Next;
@@ -63,11 +63,11 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     }
 
     // Проверка на значение
-    public bool ContainsValue(T value)
+    public bool ContainsValue(TValue value)
     {
         if (_first != null)
         {
-            List<K, T> e = _first;
+            List<TKey, TValue> e = _first;
             do
             {
                 if (e.Value.CompareTo(value) == 0)
@@ -80,17 +80,33 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     }
 
     // Получение по индексу
-    public ListItem<K, T> getNode(int k)
+    public ListItem<TKey, TValue> getNode(int k)
     {
-        if (this._first == null || this.Count < k) return new ListItem<K, T>();
+        if (this._first == null || this.Count < k) return new ListItem<TKey, TValue>();
         
-        List<K, T> e = this._first;
+        List<TKey, TValue> e = this._first;
 
         for (int i = 0; i < k; i++)
             e = e.Next;
         
         return e;
     }
+
+    public ListItem<TKey, TValue> getNodeByKey(TKey key)
+    {
+        if (this._first == null) return new ListItem<TKey, TValue>();
+        
+        List<TKey, TValue> e = this._first;
+
+        while (e.Next != null)
+        {
+            if (e.Key.Equals(key)) return e;
+            e = e.Next;
+        }
+        
+        return e;
+    }
+
 
     public void PrintList()
     {
@@ -104,7 +120,7 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     }
     
     // вставка после заданного узла
-    public int AddAfter(int k, List<K, T> item)
+    public int AddAfter(int k, List<TKey, TValue> item)
     {
         if (this._first == null || this.Count < k)
         {
@@ -112,12 +128,12 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
             return this._pos;
         }
 
-        List<K, T> e = this._first;
+        List<TKey, TValue> e = this._first;
 
         for (int i = 0; i < k; i++)
             e = e.Next;
 
-        List<K, T> temp = e.Next;
+        List<TKey, TValue> temp = e.Next;
 
         
         e.Next = item;  
@@ -127,7 +143,7 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     }
 
     // Вставка перед заданным узлом
-    public int AddBefore(int k, List<K, T> item)
+    public int AddBefore(int k, List<TKey, TValue> item)
     {
         if (_first == null || Count < k)
         {
@@ -135,7 +151,7 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
             return _pos;
         }
 
-        List<K, T> e = _first;
+        List<TKey, TValue> e = _first;
 
         for (int i = 0; i < k; i++)
         {
@@ -144,7 +160,7 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
             e = e.Next;
         }
         
-        List<K, T> temp = e.Next;
+        List<TKey, TValue> temp = e.Next;
         
         e.Next = item;  
         item.Next = temp; 
@@ -155,7 +171,7 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     // Удаление начального узла 
     public int DelStart()
     {
-        List<K, T> e;
+        List<TKey, TValue> e;
         
         if ((e = _first) == null) return 0;
 
@@ -178,11 +194,37 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
         return _pos--;
     }
 
-    // Копирование списка в другую переменную
-    public SingleLinkedList<K, T> Copy()
+    public int DelByKey(TKey key)
     {
-        SingleLinkedList<K, T> result = new SingleLinkedList<K, T>();
-        List<K, T> elem = _first;
+        if (this._first == null) return _pos;
+        
+        List<TKey, TValue> e = this._first;
+
+        while (e.Next != null)
+        {
+            if (e.Key.Equals(key)) break;
+            e = e.Next;
+        }
+
+
+        if (e.Next.Next != null) 
+        {
+            e.Next = e.Next.Next;
+        }
+        else 
+        {
+            e.Next = null;
+        }
+        
+        
+        return --_pos;
+    }
+
+    // Копирование списка в другую переменную
+    public SingleLinkedList<TKey, TValue> Copy()
+    {
+        SingleLinkedList<TKey, TValue> result = new SingleLinkedList<TKey, TValue>();
+        List<TKey, TValue> elem = _first;
         while (elem.Next != null)
         {
             result.AddStart(elem.Key, elem.Value);
@@ -195,10 +237,10 @@ public class SingleLinkedList<K,T> where K : IComparable where T : IComparable
     // Переворот списка
     public void Flip()
     {
-        SingleLinkedList<K, T> temp = Copy();
+        SingleLinkedList<TKey, TValue> temp = Copy();
         Clear();
         
-        List<K, T> elem = temp._first;
+        List<TKey, TValue> elem = temp._first;
         for (int k = 0; k < temp.Count; k++)
         {
             AddEnd(elem.Key, elem.Value);
